@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 public class GameOfLife extends JFrame {
     private int size = 0;
     private JPanel grid = new JPanel();
-    private JPanel panel = new JPanel();
     private int generation = 1;
     private int alive = 0;
     private JLabel aliveLabel = new JLabel("Alive: " + alive);
@@ -21,6 +20,7 @@ public class GameOfLife extends JFrame {
     private JPanel leftPanel = new JPanel();
     private JSlider evolutionSpeed = new JSlider(JSlider.HORIZONTAL,200,2200,1200);
     private static JColorChooser aliveColor;
+    private GridLayout gridLayout;
 
     public GameOfLife() {
         super("Game of Life");
@@ -31,7 +31,7 @@ public class GameOfLife extends JFrame {
     }
 
     public void initComponents(){
-        leftPanel.setMaximumSize(new Dimension(200, 200));
+        leftPanel.setMaximumSize(new Dimension(200, 300));
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setAlignmentY(TOP_ALIGNMENT);
         grid.setAlignmentY(TOP_ALIGNMENT);
@@ -44,6 +44,44 @@ public class GameOfLife extends JFrame {
         leftPanel.add(aliveLabel);
         leftPanel.add(buttonPanel);
         aliveLabel.setName("AliveLabel");
+
+        JPanel generationPanel = new JPanel();
+        JLabel changeGeneration = new JLabel("Desired Generations: ");
+        generationPanel.add(changeGeneration);
+        JTextField generationText = new JTextField("12");
+        generationText.addActionListener(e -> {
+            Main.setNumberOfGen(Integer.parseInt(generationText.getText())-1);
+        });
+        generationText.setMaximumSize(new Dimension(40,30));
+        generationPanel.add(generationText);
+        generationPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        leftPanel.add(generationPanel);
+
+        JPanel sizePanel = new JPanel();
+        JLabel changeSize = new JLabel("Desired Size: ");
+        sizePanel.add(changeSize);
+        JTextField sizeText = new JTextField("25");
+        sizeText.addActionListener(e-> {
+            Main.setSize(Integer.parseInt(sizeText.getText()));
+            size = Main.getSize();
+            int gap = 25/size;
+            /*gridLayout.setHgap(gap);
+            gridLayout.setVgap(gap);
+            gridLayout.setColumns(size);
+            gridLayout.setRows(size);
+            grid.setLayout(new FlowLayout());*/
+            this.remove(grid);
+            grid = new JPanel();
+            grid.setLayout(new GridLayout(size,size,gap,gap));
+            this.add(grid);
+            reset();
+            //grid.setLayout(gridLayout);
+        });
+        sizeText.setMaximumSize(new Dimension(40, 30));
+        sizePanel.add(sizeText);
+        sizePanel.setAlignmentX(LEFT_ALIGNMENT);
+        leftPanel.add(sizePanel);
+
         buttonPanel.add(pauseResume);
         pauseResume.setName("PlayToggleButton");
         buttonPanel.add(resetButton);
@@ -67,19 +105,7 @@ public class GameOfLife extends JFrame {
 
 
         resetButton.addActionListener(e -> {
-            Main.getGenThread().interrupt();
-            if (grid.getComponentCount()>0) {
-                removeComponents();
-            }
-
-            generation=1;
-            generationLabel.setText("Generation: #" + generation);
-            alive = 0;
-            aliveLabel.setText("Alive: " + alive);
-            setLabels();
-            this.revalidate();
-
-            Main.newThread();
+            reset();
         });
 
         evolutionSpeed.addChangeListener(e -> {
@@ -115,9 +141,30 @@ public class GameOfLife extends JFrame {
         deadColorButton.setAlignmentY(TOP_ALIGNMENT);
         leftPanel.add(deadColorButton);
 
+        addGrid();
+    }
+
+    public void reset(){
+        Main.getGenThread().interrupt();
+        if (grid.getComponentCount()>0) {
+            removeComponents();
+        }
+
+        generation=1;
+        generationLabel.setText("Generation: #" + generation);
+        alive = 0;
+        aliveLabel.setText("Alive: " + alive);
+        setLabels();
+        this.revalidate();
+
+        Main.newThread();
+    }
+
+    public void addGrid(){
         size = Main.getSize();
         int gap = 25/size;
-        grid.setLayout(new GridLayout(size, size, gap, gap));
+        gridLayout = new GridLayout(size, size, gap, gap);
+        grid.setLayout(gridLayout);
         grid.setMaximumSize(new Dimension(1000,1000));
         grid.setName("grid");
         grid.setAlignmentX(LEFT_ALIGNMENT);

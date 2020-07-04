@@ -3,7 +3,7 @@ import java.util.*;
 import java.lang.Thread;
 
 public class Main {
-    private static int size;
+    private static int size = 25;
     private static int numberOfGen = 11; //scanner.nextInt();
     private static GameOfLife life = new GameOfLife();
     private static Thread generationT;
@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
-        size = scanner.nextInt();
+        //size = scanner.nextInt();
         life.initComponents();
         newThread();
     }
@@ -20,8 +20,16 @@ public class Main {
         return size;
     }
 
+    public static void setSize(int s) {
+        size = s;
+    }
+
     public static int getNumberOfGen(){
         return numberOfGen;
+    }
+
+    public static void setNumberOfGen(int num) {
+        numberOfGen = num;
     }
 
     public static Thread getGenThread() {
@@ -31,10 +39,9 @@ public class Main {
     public static void newThread() {
         Random random = new Random();
         uni = new Universe(size, random, life);
-        generationT = new Thread(new Generation(uni, life, random), generation);
+        generationT = new Thread(new Generation(uni, life, random), "generation");
         generationT.start();
     }
 }
-
 
 

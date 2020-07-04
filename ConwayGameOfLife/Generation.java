@@ -216,6 +216,7 @@ public class Generation extends Thread{
 
     @Override
     public void run() {
+        while(!isInterrupted()) {
             try {
                 checkPaused();
                 initialGeneration();
@@ -224,7 +225,7 @@ public class Generation extends Thread{
                 //Main.getGenThread().sleep(time);
                 return;
             } catch (InterruptedException e) {
-                System.out.println(Sleeping was interrupted);
+                System.out.println("Sleeping was interrupted");
                 return;
             }
         }
@@ -237,11 +238,12 @@ public class Generation extends Thread{
                 for (int i = 0; i< Main.getSize(); i++) {
                     for (int a = 0; a < Main.getSize(); a++) {
                         cellEvolution(i, a);
-                        if (life.getGrid().getComponentCount()>0) {
+                        /*if (life.getGrid().getComponentCount()>0) {
                             life.getGrid().remove(0);
-                        }
+                        }*/
                     }
                 }
+                life.getGrid().removeAll();
                 checkPaused();
                 setUniv();
                 Thread thread = Thread.currentThread();
@@ -278,4 +280,3 @@ public class Generation extends Thread{
         return deadColor;
     }
 }
-
