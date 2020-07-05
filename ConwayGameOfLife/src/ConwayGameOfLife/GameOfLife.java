@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLOutput;
 import java.util.Scanner;
 
@@ -26,10 +28,11 @@ public class GameOfLife extends JFrame {
     private JSlider evolutionSpeed = new JSlider(JSlider.HORIZONTAL,200,2200,1200);
     private static JColorChooser aliveColor;
     private GridLayout gridLayout;
-    private boolean loading = false;
+    private static boolean loading = false;
     private boolean[][] tempUni;
     private JTextField generationText;
     private JTextField sizeText;
+    private FileWriter fileWriter;
 
     public GameOfLife() {
         super("Game of Life");
@@ -62,30 +65,27 @@ public class GameOfLife extends JFrame {
                 //This is where a real application would open the file.
                 try {
                     Scanner fileScan = new Scanner(file);
-                    Main.setSize(fileScan.nextInt());
-                    Main.setNumberOfGen(fileScan.nextInt());
-                    Generation.setZ(fileScan.nextInt());
-                    size = Main.getSize();
-                    tempUni = new boolean[size][size];
-                    for (int i = 0; i < size; i++){
-                        for (int n = 0; n < size; n++) {
+                    int newSize = fileScan.nextInt();
+                    generationText.setText(String.valueOf(fileScan.nextInt())); //sets Main # of gens
+                    for (ActionListener a : generationText.getActionListeners()) {
+                        a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+                    }
+                    generation = fileScan.nextInt();
+                    tempUni = new boolean[newSize][newSize];
+                    for (int i = 0; i < newSize; i++){
+                        for (int n = 0; n < newSize; n++) {
                             tempUni[i][n] = fileScan.nextBoolean();
                         }
                     }
                     loading = true;
-                    generationText.setText(String.valueOf(Main.getNumberOfGen()));
-                    sizeText.setText(String.valueOf(size));
-                    for (ActionListener a : generationText.getActionListeners()) {
-                        a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-                    }
+                    sizeText.setText(String.valueOf(newSize));
+                    //Universe.setUniverse(tempUni);
+                    Generation.setZ(generation);
+
                     for (ActionListener a : sizeText.getActionListeners()) {
                         a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                     }
 
-                    Main.newThread();
-                    if (Main.getGenThread().getState().equals(Thread.State.TERMINATED)) {
-                        loading = false;
-                    }
                 } catch (FileNotFoundException fileNotFoundException) {
                     fileNotFoundException.printStackTrace();
                 }
@@ -94,33 +94,30 @@ public class GameOfLife extends JFrame {
                 System.out.println("Open command cancelled by user.");
             }
         });
-        saveButton.addActionListener(e -> {
+        saveButton.addActionListener(e-> {
             int returnVal = fileC.showSaveDialog(this);
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fileC.getSelectedFile();
                 //This is where a real application would open the file.
-                try {
-                    Scanner fileScan = new Scanner(file);
-                    Main.setSize(fileScan.nextInt());
-                    Main.setNumberOfGen(fileScan.nextInt());
-                    Generation.setZ(fileScan.nextInt());
-                    size = Main.getSize();
-                    tempUni = new boolean[size][size];
-                    for (int i = 0; i < size; i++){
-                        for (int n = 0; n < size; n++) {
-                            tempUni[i][n] = fileScan.nextBoolean();
-                        }
+                paused = true;
+                int tempSize = Main.getSize();
+                boolean[][] tempUniv = Universe.getUniverse();
+                String fileContent = tempSize + " " + ((int)Main.getNumberOfGen()+1) + " " + ((int)Generation.getZ()+1) + " ";
+                for (int i = 0; i < tempSize; i++) {
+                    for (int a = 0; a < tempSize; a++) {
+                        fileContent += tempUniv[i][a] + " ";
                     }
-                    loading = true;
-                    Main.newThread();
-                    if (Main.getGenThread().getState().equals(Thread.State.TERMINATED)) {
-                        loading = false;
-                    }
-                } catch (FileNotFoundException fileNotFoundException) {
-                    fileNotFoundException.printStackTrace();
                 }
-
+                System.out.println(fileContent);
+                try {
+                    fileWriter = new FileWriter(file);
+                    fileWriter.append(fileContent);
+                    fileWriter.close();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                paused=false;
             } else {
                 System.out.println("Open command cancelled by user.");
             }
@@ -170,7 +167,9 @@ public class GameOfLife extends JFrame {
             if (grid.getComponentCount()>0) {
                 removeComponents();
             }
-            generation=1;
+            if (!loading) {
+                generation = 1;
+            }
             generationLabel.setText("Generation: #" + generation);
             alive = 0;
             aliveLabel.setText("Alive: " + alive);
@@ -251,8 +250,10 @@ public class GameOfLife extends JFrame {
         if (grid.getComponentCount()>0) {
             removeComponents();
         }
-
-        generation=1;
+        if (!loading) {
+            generation = 1;
+            Generation.setZ(1);
+        }
         generationLabel.setText("Generation: #" + generation);
         alive = 0;
         aliveLabel.setText("Alive: " + alive);
@@ -317,6 +318,10 @@ public class GameOfLife extends JFrame {
 
     public boolean[][] getTempUni() {
         return tempUni;
+    }
+
+    public static void setLoading (boolean b) {
+        loading = b;
     }
 
 }

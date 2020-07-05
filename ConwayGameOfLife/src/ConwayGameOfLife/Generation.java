@@ -11,7 +11,7 @@ public class Generation extends Thread{
     private static Random random;
     private static Color aliveColor = Color.green;
     private static Color deadColor = Color.black;
-    private static int z = 0;
+    private static int z = 1;
 
     public Generation(Universe universe, GameOfLife life, Random random) {
         this.univ = universe;
@@ -231,9 +231,14 @@ public class Generation extends Thread{
                     initialGeneration();
                 } else {
                     univ.setUniverse(life.getTempUni());
+                    univ.getTotalAlive(univ.getUniverse());
+                    life.setLabels();
+                    refreshGridColor();
+                    life.getGrid().revalidate();
                 }
                 Main.getGenThread().sleep(time);
                 restGen();
+                life.setLoading(false);
                 //Main.getGenThread().sleep(time);
                 return;
             } catch (InterruptedException e) {
@@ -245,7 +250,10 @@ public class Generation extends Thread{
 
     public static void restGen() throws InterruptedException {
         if (Main.getNumberOfGen()>0) {
-            for (int b = z; b < Main.getNumberOfGen(); b++) {
+            if (!life.getLoading()){
+                z=1;
+            }
+            for (int b = z; b <= Main.getNumberOfGen(); b++) {
                 checkPaused();
                 for (int i = 0; i< Main.getSize(); i++) {
                     for (int a = 0; a < Main.getSize(); a++) {
@@ -260,7 +268,7 @@ public class Generation extends Thread{
                 setUniv();
                 Thread thread = Thread.currentThread();
                 thread.sleep(time);
-
+                z = b;
             }
         }
 
@@ -294,5 +302,9 @@ public class Generation extends Thread{
 
     public static void setZ(int ze) {
         z = ze;
+    }
+
+    public static int getZ() {
+        return z;
     }
 }
