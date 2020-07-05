@@ -44,7 +44,7 @@ public class GameOfLife extends JFrame {
     }
 
     public void initComponents(){
-        leftPanel.setMaximumSize(new Dimension(200, 300));
+        leftPanel.setMaximumSize(new Dimension(200, 375));
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setAlignmentY(TOP_ALIGNMENT);
         grid.setAlignmentY(TOP_ALIGNMENT);
@@ -57,6 +57,7 @@ public class GameOfLife extends JFrame {
         JButton loadButton = new JButton("Load");
         JButton saveButton = new JButton("Save");
         JPanel filePanel = new JPanel();
+        filePanel.setMaximumSize(new Dimension(200, 50));
         loadButton.addActionListener(e-> {
             int returnVal = fileC.showOpenDialog(this);
 
@@ -122,32 +123,55 @@ public class GameOfLife extends JFrame {
                 System.out.println("Open command cancelled by user.");
             }
         });
+        filePanel.add(Box.createRigidArea(new Dimension(2,0)));
         filePanel.add(loadButton);
         filePanel.add(saveButton);
         filePanel.setAlignmentX(LEFT_ALIGNMENT);
         leftPanel.add(filePanel);
-
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setAlignmentX(LEFT_ALIGNMENT);
-        leftPanel.add(generationLabel);
-        generationLabel.setName("GenerationLabel");
-        leftPanel.add(aliveLabel);
+        buttonPanel.setMaximumSize(new Dimension(200, 50));
         leftPanel.add(buttonPanel);
+        buttonPanel.add(Box.createRigidArea(new Dimension(2,0)));
+        JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+        separator.setMaximumSize(new Dimension(400, 30));
+        leftPanel.add(separator);
+
+        //leftPanel.add(generationLabel);
+        generationLabel.setName("GenerationLabel");
+        generationLabel.setAlignmentX(CENTER_ALIGNMENT);
+        //generationLabel.setSize(200, 20);
+        aliveLabel.setAlignmentX(CENTER_ALIGNMENT);
+        //leftPanel.add(aliveLabel);
+        JPanel labelPanel = new JPanel();
+        labelPanel.add(generationLabel);
+        labelPanel.add(Box.createRigidArea(new Dimension (0,15)));
+        labelPanel.add(aliveLabel);
+        labelPanel.setLayout(new BoxLayout(labelPanel,BoxLayout.Y_AXIS));
+        JPanel anotherLabelPanel = new JPanel();
+        //anotherLabelPanel.add(Box.createRigidArea(new Dimension (0,0)));
+        anotherLabelPanel.add(labelPanel);
+        anotherLabelPanel.setMaximumSize(new Dimension(200, 60));
+        anotherLabelPanel.setAlignmentX(LEFT_ALIGNMENT);
+        leftPanel.add(anotherLabelPanel);
+        JSeparator separator2 = new JSeparator(SwingConstants.HORIZONTAL);
+        separator2.setMaximumSize(new Dimension(400, 30));
+        leftPanel.add(separator2);
+
         aliveLabel.setName("AliveLabel");
 
         JPanel generationPanel = new JPanel();
-
         JLabel changeGeneration = new JLabel("Desired Generations: ");
         generationPanel.add(changeGeneration);
         generationText = new JTextField("12");
         generationText.addActionListener(e -> {
             Main.setNumberOfGen(Integer.parseInt(generationText.getText())-1);
         });
-        generationText.setMaximumSize(new Dimension(50,30));
+        generationText.setMaximumSize(new Dimension(50,20));
         generationPanel.add(generationText);
         generationPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        generationPanel.setMaximumSize(new Dimension(200,30));
+        generationPanel.setMaximumSize(new Dimension(200,20));
         leftPanel.add(generationPanel);
+        leftPanel.add(Box.createRigidArea(new Dimension(0,3)));
 
         JPanel sizePanel = new JPanel();
         JLabel changeSize = new JLabel("Desired Size: ");
@@ -156,6 +180,10 @@ public class GameOfLife extends JFrame {
         sizeText.addActionListener(e-> {
             Main.getGenThread().interrupt();
             Main.setSize(Integer.parseInt(sizeText.getText()));
+            if (Main.getSize()==0) {
+                Main.setSize(1);
+                sizeText.setText("1");
+            }
             size = Main.getSize();
             int gap = 25/size;
             this.remove(grid);
@@ -181,18 +209,19 @@ public class GameOfLife extends JFrame {
         sizeText.setMaximumSize(new Dimension(40, 30));
         sizePanel.add(sizeText);
         sizePanel.setAlignmentX(LEFT_ALIGNMENT);
+        sizePanel.setMaximumSize(new Dimension(200, 50));
         leftPanel.add(sizePanel);
+        JSeparator separator3 = new JSeparator(SwingConstants.HORIZONTAL);
+        separator3.setMaximumSize(new Dimension(400, 30));
+        leftPanel.add(separator3);
 
+        buttonPanel.setAlignmentX(LEFT_ALIGNMENT);
+        buttonPanel.setAlignmentY(TOP_ALIGNMENT);
         buttonPanel.add(pauseResume);
         pauseResume.setName("PlayToggleButton");
         buttonPanel.add(resetButton);
         resetButton.setName("ResetButton");
-
-        generationLabel.setAlignmentX(LEFT_ALIGNMENT);
-        //generationLabel.setSize(200, 20);
         pauseResume.setHorizontalAlignment(SwingConstants.LEFT);
-        aliveLabel.setAlignmentX(LEFT_ALIGNMENT);
-        //aliveLabel.setSize(200, 20);
 
         pauseResume.addActionListener(e -> {
             if (!paused) {
@@ -204,7 +233,6 @@ public class GameOfLife extends JFrame {
             }
         });
 
-
         resetButton.addActionListener(e -> {
             reset();
         });
@@ -215,10 +243,21 @@ public class GameOfLife extends JFrame {
         evolutionSpeed.setMajorTickSpacing(200);
         evolutionSpeed.setPaintTicks(true);
         evolutionSpeed.setSnapToTicks(true);
-        evolutionSpeed.setAlignmentX(LEFT_ALIGNMENT);
+        evolutionSpeed.setAlignmentX(CENTER_ALIGNMENT);
         evolutionSpeed.setAlignmentY(TOP_ALIGNMENT);
         //evolutionSpeed.setPaintLabels(true);
-        leftPanel.add(evolutionSpeed);
+        //leftPanel.add(Box.createRigidArea(new Dimension(0,10)));
+        JLabel evoSpeed = new JLabel("Change Evolution Speed: ");
+        evoSpeed.setAlignmentX(CENTER_ALIGNMENT);
+        JPanel evoSpeedPanel = new JPanel();
+        evoSpeedPanel.setAlignmentX(LEFT_ALIGNMENT);
+        evoSpeedPanel.setLayout(new BoxLayout(evoSpeedPanel, BoxLayout.Y_AXIS));
+        evoSpeedPanel.add(evoSpeed);
+        evoSpeedPanel.add(Box.createRigidArea(new Dimension(0,10)));
+        evoSpeedPanel.add(evolutionSpeed);
+        evoSpeedPanel.setMaximumSize(new Dimension(200, 70));
+        evoSpeedPanel.add(Box.createRigidArea(new Dimension(0,10)));
+        leftPanel.add(evoSpeedPanel);
 
         //aliveColor = new JColorChooser(Generation.getAliveColor());
         JButton colorButton = new JButton();
@@ -229,7 +268,9 @@ public class GameOfLife extends JFrame {
             Generation.refreshGridColor();
         });
         colorButton.setAlignmentY(TOP_ALIGNMENT);
-        leftPanel.add(colorButton);
+        JPanel updatedColorPanel = new JPanel();
+        updatedColorPanel.setAlignmentX(LEFT_ALIGNMENT);
+        updatedColorPanel.add(colorButton);
 
         JButton deadColorButton = new JButton();
         deadColorButton.setText("Change Dead Color");
@@ -240,7 +281,12 @@ public class GameOfLife extends JFrame {
 
         });
         deadColorButton.setAlignmentY(TOP_ALIGNMENT);
-        leftPanel.add(deadColorButton);
+        updatedColorPanel.add(deadColorButton);
+        updatedColorPanel.setLayout(new BoxLayout(updatedColorPanel,BoxLayout.Y_AXIS));
+        updatedColorPanel.setMaximumSize(new Dimension(200,75));
+        deadColorButton.setMaximumSize(new Dimension(200,30));
+        colorButton.setMaximumSize(new Dimension(200,30));
+        leftPanel.add(updatedColorPanel);
 
         addGrid();
     }
