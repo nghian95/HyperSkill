@@ -44,4 +44,8 @@ public class Universe {
         return universe;
     }
 
+    public static void setUniverse(boolean[][] uni) {
+        universe = uni;
+    }
+
 }

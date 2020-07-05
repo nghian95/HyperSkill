@@ -11,6 +11,7 @@ public class Generation extends Thread{
     private static Random random;
     private static Color aliveColor = Color.green;
     private static Color deadColor = Color.black;
+    private static int z = 0;
 
     public Generation(Universe universe, GameOfLife life, Random random) {
         this.univ = universe;
@@ -168,10 +169,12 @@ public class Generation extends Thread{
             for (int a=0; a<univ.getSize()+1; a++) {
                 univ.universe[i][a]=univ.nextGen[i][a];
                 JPanel temp = new JPanel();
-                if (univ.universe[i][a]==true) {
-                    temp.setBackground(aliveColor);
-                } else {
-                    temp.setBackground(deadColor);
+                if (univ.universe.length==Main.getSize()) {
+                    if (univ.universe[i][a] == true) {
+                        temp.setBackground(aliveColor);
+                    } else {
+                        temp.setBackground(deadColor);
+                    }
                 }
                 univ.getLife().getGrid().add(temp);
             }
@@ -201,12 +204,17 @@ public class Generation extends Thread{
             for (int a = 0; a <= univ.getSize(); a++) {
                 univ.getUniverse()[i][a] = random.nextBoolean();
                 JPanel temp = new JPanel();
-                if (univ.getUniverse()[i][a]==true) {
-                    temp.setBackground(aliveColor);
-                } else {
-                    temp.setBackground(deadColor);
+                if (univ.getUniverse().length==Main.getSize()) {
+                    if (Main.getGenThread().isInterrupted()) {
+                        break;
+                    }
+                    if (univ.getUniverse()[i][a] == true) {
+                        temp.setBackground(aliveColor);
+                    } else {
+                        temp.setBackground(deadColor);
+                    }
+                    life.getGrid().add(temp);
                 }
-                life.getGrid().add(temp);
             }
         }
         univ.getTotalAlive(univ.getUniverse());
@@ -219,7 +227,11 @@ public class Generation extends Thread{
         while(!isInterrupted()) {
             try {
                 checkPaused();
-                initialGeneration();
+                if (!life.getLoading()) {
+                    initialGeneration();
+                } else {
+                    univ.setUniverse(life.getTempUni());
+                }
                 Main.getGenThread().sleep(time);
                 restGen();
                 //Main.getGenThread().sleep(time);
@@ -233,7 +245,7 @@ public class Generation extends Thread{
 
     public static void restGen() throws InterruptedException {
         if (Main.getNumberOfGen()>0) {
-            for (int z = 0; z< Main.getNumberOfGen(); z++) {
+            for (int b = z; b < Main.getNumberOfGen(); b++) {
                 checkPaused();
                 for (int i = 0; i< Main.getSize(); i++) {
                     for (int a = 0; a < Main.getSize(); a++) {
@@ -243,8 +255,8 @@ public class Generation extends Thread{
                         }*/
                     }
                 }
-                life.getGrid().removeAll();
                 checkPaused();
+                life.getGrid().removeAll();
                 setUniv();
                 Thread thread = Thread.currentThread();
                 thread.sleep(time);
@@ -278,5 +290,9 @@ public class Generation extends Thread{
 
     public static Color getDeadColor() {
         return deadColor;
+    }
+
+    public static void setZ(int ze) {
+        z = ze;
     }
 }
