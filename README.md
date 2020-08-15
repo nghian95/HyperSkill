@@ -27,3 +27,8 @@ for cells.
 
 Used Swing's components and its layout managers to create a user interface, multithreading, Random class, lambda
 expressions, ActionListeners and more to finish this task.  
+
+|Text Editor|
+Created a basic Text Editor with file save, load, search options along with a user interface created from Swing 
+components. Added Shortcut Keys, a regex and regular search (along with next and previous occurences), and image
+icons. 
