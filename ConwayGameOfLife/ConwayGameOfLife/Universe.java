@@ -7,9 +7,9 @@ public class Universe {
     public static boolean[][] universe;
     public static boolean[][] nextGen;
     private static Random random;
-    private static GameOfLife life;
+    private static GameOfLifeInterface life;
 
-    public Universe(int size, Random random, GameOfLife life) {
+    public Universe(int size, Random random, GameOfLifeInterface life) {
         this.size = size;
         Universe.random = random;
         universe = new boolean[size][size];
@@ -36,7 +36,7 @@ public class Universe {
         return counter;
     }
 
-    public GameOfLife getLife() {
+    public GameOfLifeInterface getLife() {
         return life;
     }
 

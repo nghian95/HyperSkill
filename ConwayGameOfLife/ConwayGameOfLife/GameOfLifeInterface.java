@@ -24,27 +24,31 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-public class GameOfLife extends JFrame {
+public class GameOfLifeInterface extends JFrame {
     private int size = 0;
     private JPanel grid = new JPanel();
-    private int generation = 1;
-    private int alive = 0;
+    private GridLayout gridLayout;
+
+    private JPanel leftPanel;
     private JLabel aliveLabel;
+    private int alive = 0;
     private JLabel generationLabel;
+    private int generation = 1;
     private JToggleButton pauseResume;
     private JButton resetButton;
-    private boolean paused;
-    private JPanel leftPanel;
     private JSlider evolutionSpeed;
-    private static JColorChooser aliveColor;
-    private GridLayout gridLayout;
+    //private static JColorChooser aliveColor;
+
+    private boolean paused;
     private static boolean loading = false;
     private boolean[][] tempUni;
+
     private JTextField generationText;
     private JTextField sizeText;
+
     private FileWriter fileWriter;
 
-    public GameOfLife() {
+    public GameOfLifeInterface() {
         super("Game of Life");
         this.aliveLabel = new JLabel("Alive: " + this.alive);
         this.generationLabel = new JLabel("Generation: #" + this.generation);
@@ -61,6 +65,150 @@ public class GameOfLife extends JFrame {
     }
 
     public void initComponents() {
+        initFilePanel();
+        initRunPanel();
+        initDescriptorPanel();
+        initEditPanel();
+        initEvoSpeedPanel();
+        initColorPanel();
+        this.addGrid();
+    }
+
+    private void initColorPanel() {
+        JButton colorButton = new JButton();
+        colorButton.setText("Change Alive Color");
+        colorButton.addActionListener((e) -> {
+            Color color = JColorChooser.showDialog(this, "Select a color", Generation.getAliveColor());
+            Generation.setAliveColor(color);
+            Generation.refreshGridColor();
+        });
+        colorButton.setAlignmentY(0.0F);
+        JPanel updatedColorPanel = new JPanel();
+        updatedColorPanel.setAlignmentX(0.0F);
+        updatedColorPanel.add(colorButton);
+        JButton deadColorButton = new JButton();
+        deadColorButton.setText("Change Dead Color");
+        deadColorButton.addActionListener((e) -> {
+            Color color = JColorChooser.showDialog(this, "Select a color", Generation.getDeadColor());
+            Generation.setDeadColor(color);
+            Generation.refreshGridColor();
+        });
+        deadColorButton.setAlignmentY(0.0F);
+        updatedColorPanel.add(deadColorButton);
+        updatedColorPanel.setLayout(new BoxLayout(updatedColorPanel, 1));
+        updatedColorPanel.setMaximumSize(new Dimension(200, 75));
+        deadColorButton.setMaximumSize(new Dimension(200, 30));
+        colorButton.setMaximumSize(new Dimension(200, 30));
+        this.leftPanel.add(updatedColorPanel);
+    }
+
+    private void initEvoSpeedPanel() {
+        this.evolutionSpeed.addChangeListener((e) -> {
+            Generation.setTime(this.evolutionSpeed.getValue());
+        });
+        this.evolutionSpeed.setMajorTickSpacing(200);
+        this.evolutionSpeed.setPaintTicks(true);
+        this.evolutionSpeed.setSnapToTicks(true);
+        this.evolutionSpeed.setAlignmentX(0.5F);
+        this.evolutionSpeed.setAlignmentY(0.0F);
+        JLabel evoSpeed = new JLabel("Change Evolution Speed: ");
+        evoSpeed.setAlignmentX(0.5F);
+        JPanel evoSpeedPanel = new JPanel();
+        evoSpeedPanel.setAlignmentX(0.0F);
+        evoSpeedPanel.setLayout(new BoxLayout(evoSpeedPanel, 1));
+        evoSpeedPanel.add(evoSpeed);
+        evoSpeedPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        evoSpeedPanel.add(this.evolutionSpeed);
+        evoSpeedPanel.setMaximumSize(new Dimension(200, 70));
+        evoSpeedPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        this.leftPanel.add(evoSpeedPanel);
+    }
+
+    private void initEditPanel() {
+        JPanel generationPanel = new JPanel();
+        JLabel desiredGenerations = new JLabel("Desired Generations: ");
+        generationPanel.add(desiredGenerations);
+        this.generationText = new JTextField("12");
+        this.generationText.addActionListener((e) -> {
+            Main.setNumberOfGen(Integer.parseInt(this.generationText.getText()) - 1);
+        });
+        this.generationText.setMaximumSize(new Dimension(50, 20));
+        generationPanel.add(this.generationText);
+        generationPanel.setAlignmentX(0.0F);
+        generationPanel.setMaximumSize(new Dimension(200, 20));
+        this.leftPanel.add(generationPanel);
+
+        this.leftPanel.add(Box.createRigidArea(new Dimension(0, 3)));
+
+        JPanel sizePanel = new JPanel();
+        JLabel desiredSize = new JLabel("Desired Size: ");
+        sizePanel.add(desiredSize);
+        this.sizeText = new JTextField("25");
+        this.sizeText.addActionListener((e) -> {
+            Main.getGenThread().interrupt();
+            Main.setSize(Integer.parseInt(this.sizeText.getText()));
+            if (Main.getSize() == 0) {
+                Main.setSize(1);
+                this.sizeText.setText("1");
+            }
+
+            this.size = Main.getSize();
+            int gap = 25 / this.size;
+            this.remove(this.grid);
+            this.grid = new JPanel();
+            this.grid.setLayout(new GridLayout(this.size, this.size, gap, gap));
+            this.grid.setAlignmentY(0.0F);
+            this.add(this.grid);
+            if (this.grid.getComponentCount() > 0) {
+                this.removeComponents();
+            }
+
+            if (!loading) {
+                this.generation = 1;
+            }
+
+            this.generationLabel.setText("Generation: #" + this.generation);
+            this.alive = 0;
+            this.aliveLabel.setText("Alive: " + this.alive);
+            this.setLabels();
+            this.revalidate();
+            Main.newThread();
+        });
+        this.sizeText.setMaximumSize(new Dimension(40, 30));
+        sizePanel.add(this.sizeText);
+        sizePanel.setAlignmentX(0.0F);
+        sizePanel.setMaximumSize(new Dimension(200, 50));
+        this.leftPanel.add(sizePanel);
+        JSeparator separator3 = new JSeparator(0);
+        separator3.setMaximumSize(new Dimension(400, 30));
+        this.leftPanel.add(separator3);
+    }
+
+    private void initDescriptorPanel() {
+        this.generationLabel.setName("GenerationLabel");
+        this.generationLabel.setAlignmentX(0.5F);
+
+        this.aliveLabel.setAlignmentX(0.5F);
+        this.aliveLabel.setName("AliveLabel");
+
+        JPanel descriptorPanel = new JPanel();
+        descriptorPanel.add(this.generationLabel);
+        descriptorPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        descriptorPanel.add(this.aliveLabel);
+        descriptorPanel.setLayout(new BoxLayout(descriptorPanel, 1));
+
+        JPanel outerDescriptorPanel = new JPanel();
+        outerDescriptorPanel.add(descriptorPanel);
+        outerDescriptorPanel.setMaximumSize(new Dimension(200, 60));
+        outerDescriptorPanel.setAlignmentX(0.0F);
+        this.leftPanel.add(outerDescriptorPanel);
+
+        JSeparator separator2 = new JSeparator(0);
+        separator2.setMaximumSize(new Dimension(400, 30));
+        this.leftPanel.add(separator2);
+    }
+
+    private void initFilePanel() {
         this.leftPanel.setMaximumSize(new Dimension(200, 375));
         this.leftPanel.setLayout(new BoxLayout(this.leftPanel, 1));
         this.leftPanel.setAlignmentY(0.0F);
@@ -146,90 +294,18 @@ public class GameOfLife extends JFrame {
         filePanel.add(saveButton);
         filePanel.setAlignmentX(0.0F);
         this.leftPanel.add(filePanel);
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setMaximumSize(new Dimension(200, 50));
-        this.leftPanel.add(buttonPanel);
-        buttonPanel.add(Box.createRigidArea(new Dimension(2, 0)));
-        JSeparator separator = new JSeparator(0);
-        separator.setMaximumSize(new Dimension(400, 30));
-        this.leftPanel.add(separator);
-        this.generationLabel.setName("GenerationLabel");
-        this.generationLabel.setAlignmentX(0.5F);
-        this.aliveLabel.setAlignmentX(0.5F);
-        JPanel labelPanel = new JPanel();
-        labelPanel.add(this.generationLabel);
-        labelPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        labelPanel.add(this.aliveLabel);
-        labelPanel.setLayout(new BoxLayout(labelPanel, 1));
-        JPanel anotherLabelPanel = new JPanel();
-        anotherLabelPanel.add(labelPanel);
-        anotherLabelPanel.setMaximumSize(new Dimension(200, 60));
-        anotherLabelPanel.setAlignmentX(0.0F);
-        this.leftPanel.add(anotherLabelPanel);
-        JSeparator separator2 = new JSeparator(0);
-        separator2.setMaximumSize(new Dimension(400, 30));
-        this.leftPanel.add(separator2);
-        this.aliveLabel.setName("AliveLabel");
-        JPanel generationPanel = new JPanel();
-        JLabel changeGeneration = new JLabel("Desired Generations: ");
-        generationPanel.add(changeGeneration);
-        this.generationText = new JTextField("12");
-        this.generationText.addActionListener((e) -> {
-            Main.setNumberOfGen(Integer.parseInt(this.generationText.getText()) - 1);
-        });
-        this.generationText.setMaximumSize(new Dimension(50, 20));
-        generationPanel.add(this.generationText);
-        generationPanel.setAlignmentX(0.0F);
-        generationPanel.setMaximumSize(new Dimension(200, 20));
-        this.leftPanel.add(generationPanel);
-        this.leftPanel.add(Box.createRigidArea(new Dimension(0, 3)));
-        JPanel sizePanel = new JPanel();
-        JLabel changeSize = new JLabel("Desired Size: ");
-        sizePanel.add(changeSize);
-        this.sizeText = new JTextField("25");
-        this.sizeText.addActionListener((e) -> {
-            Main.getGenThread().interrupt();
-            Main.setSize(Integer.parseInt(this.sizeText.getText()));
-            if (Main.getSize() == 0) {
-                Main.setSize(1);
-                this.sizeText.setText("1");
-            }
+    }
 
-            this.size = Main.getSize();
-            int gap = 25 / this.size;
-            this.remove(this.grid);
-            this.grid = new JPanel();
-            this.grid.setLayout(new GridLayout(this.size, this.size, gap, gap));
-            this.grid.setAlignmentY(0.0F);
-            this.add(this.grid);
-            if (this.grid.getComponentCount() > 0) {
-                this.removeComponents();
-            }
-
-            if (!loading) {
-                this.generation = 1;
-            }
-
-            this.generationLabel.setText("Generation: #" + this.generation);
-            this.alive = 0;
-            this.aliveLabel.setText("Alive: " + this.alive);
-            this.setLabels();
-            this.revalidate();
-            Main.newThread();
-        });
-        this.sizeText.setMaximumSize(new Dimension(40, 30));
-        sizePanel.add(this.sizeText);
-        sizePanel.setAlignmentX(0.0F);
-        sizePanel.setMaximumSize(new Dimension(200, 50));
-        this.leftPanel.add(sizePanel);
-        JSeparator separator3 = new JSeparator(0);
-        separator3.setMaximumSize(new Dimension(400, 30));
-        this.leftPanel.add(separator3);
-        buttonPanel.setAlignmentX(0.0F);
-        buttonPanel.setAlignmentY(0.0F);
-        buttonPanel.add(this.pauseResume);
+    private void initRunPanel() {
+        JPanel runPanel = new JPanel();
+        runPanel.setMaximumSize(new Dimension(200, 50));
+        this.leftPanel.add(runPanel);
+        runPanel.add(Box.createRigidArea(new Dimension(2, 0)));
+        runPanel.setAlignmentX(0.0F);
+        runPanel.setAlignmentY(0.0F);
+        runPanel.add(this.pauseResume);
         this.pauseResume.setName("PlayToggleButton");
-        buttonPanel.add(this.resetButton);
+        runPanel.add(this.resetButton);
         this.resetButton.setName("ResetButton");
         this.pauseResume.setHorizontalAlignment(2);
         this.pauseResume.addActionListener((e) -> {
@@ -238,56 +314,13 @@ public class GameOfLife extends JFrame {
             } else {
                 this.paused = false;
             }
-
         });
         this.resetButton.addActionListener((e) -> {
             this.reset();
         });
-        this.evolutionSpeed.addChangeListener((e) -> {
-            Generation.setTime(this.evolutionSpeed.getValue());
-        });
-        this.evolutionSpeed.setMajorTickSpacing(200);
-        this.evolutionSpeed.setPaintTicks(true);
-        this.evolutionSpeed.setSnapToTicks(true);
-        this.evolutionSpeed.setAlignmentX(0.5F);
-        this.evolutionSpeed.setAlignmentY(0.0F);
-        JLabel evoSpeed = new JLabel("Change Evolution Speed: ");
-        evoSpeed.setAlignmentX(0.5F);
-        JPanel evoSpeedPanel = new JPanel();
-        evoSpeedPanel.setAlignmentX(0.0F);
-        evoSpeedPanel.setLayout(new BoxLayout(evoSpeedPanel, 1));
-        evoSpeedPanel.add(evoSpeed);
-        evoSpeedPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        evoSpeedPanel.add(this.evolutionSpeed);
-        evoSpeedPanel.setMaximumSize(new Dimension(200, 70));
-        evoSpeedPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        this.leftPanel.add(evoSpeedPanel);
-        JButton colorButton = new JButton();
-        colorButton.setText("Change Alive Color");
-        colorButton.addActionListener((e) -> {
-            Color color = JColorChooser.showDialog(this, "Select a color", Generation.getAliveColor());
-            Generation.setAliveColor(color);
-            Generation.refreshGridColor();
-        });
-        colorButton.setAlignmentY(0.0F);
-        JPanel updatedColorPanel = new JPanel();
-        updatedColorPanel.setAlignmentX(0.0F);
-        updatedColorPanel.add(colorButton);
-        JButton deadColorButton = new JButton();
-        deadColorButton.setText("Change Dead Color");
-        deadColorButton.addActionListener((e) -> {
-            Color color = JColorChooser.showDialog(this, "Select a color", Generation.getDeadColor());
-            Generation.setDeadColor(color);
-            Generation.refreshGridColor();
-        });
-        deadColorButton.setAlignmentY(0.0F);
-        updatedColorPanel.add(deadColorButton);
-        updatedColorPanel.setLayout(new BoxLayout(updatedColorPanel, 1));
-        updatedColorPanel.setMaximumSize(new Dimension(200, 75));
-        deadColorButton.setMaximumSize(new Dimension(200, 30));
-        colorButton.setMaximumSize(new Dimension(200, 30));
-        this.leftPanel.add(updatedColorPanel);
-        this.addGrid();
+        JSeparator separator = new JSeparator(0);
+        separator.setMaximumSize(new Dimension(400, 30));
+        this.leftPanel.add(separator);
     }
 
     private void getGridValues(Scanner fileScan, int newSize) {

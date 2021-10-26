@@ -5,7 +5,7 @@ import java.util.Random;
 public class Main {
     private static int size = 25;
     private static int numberOfGen = 11;
-    private static GameOfLife life = new GameOfLife();
+    private static GameOfLifeInterface life = new GameOfLifeInterface();
     private static Thread generationT;
     private static Universe uni;
 
