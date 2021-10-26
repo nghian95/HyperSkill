@@ -6,14 +6,14 @@ import javax.swing.JPanel;
 
 public class Generation extends Thread {
     private static Universe univ;
-    private static GameOfLife life;
+    private static GameOfLifeInterface life;
     private static int time = 1000;
     private static Random random;
     private static Color aliveColor;
     private static Color deadColor;
     private static int z;
 
-    public Generation(Universe universe, GameOfLife life, Random random) {
+    public Generation(Universe universe, GameOfLifeInterface life, Random random) {
         univ = universe;
         Generation.life = life;
         Generation.random = random;
@@ -254,7 +254,7 @@ public class Generation extends Thread {
                 Main.getGenThread();
                 Thread.sleep((long)time);
                 restGen();
-                GameOfLife.setLoading(false);
+                GameOfLifeInterface.setLoading(false);
             } catch (InterruptedException var2) {
                 System.out.println("Sleeping was interrupted");
             }

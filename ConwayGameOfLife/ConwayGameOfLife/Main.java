@@ -5,7 +5,7 @@ import java.util.Random;
 public class Main {
     private static int size = 25;
     private static int numberOfGen = 11;
-    private static GameOfLife life = new GameOfLife();
+    private static GameOfLifeInterface life = new GameOfLifeInterface();
     private static Thread generationT;
     private static Universe uni;
 
@@ -42,5 +42,6 @@ public class Main {
         uni = new Universe(size, random, life);
         generationT = new Thread(new Generation(uni, life, random), "generation");
         generationT.start();
+        System.out.println(Thread.activeCount());
     }
 }
