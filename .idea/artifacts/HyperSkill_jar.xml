@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HyperSkill:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HyperSkill_jar</output-path>
+    <root id="archive" name="HyperSkill.jar">
+      <element id="module-output" name="HyperSkill" />
+    </root>
+  </artifact>
+</component>

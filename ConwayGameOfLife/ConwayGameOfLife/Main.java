@@ -42,5 +42,6 @@ public class Main {
         uni = new Universe(size, random, life);
         generationT = new Thread(new Generation(uni, life, random), "generation");
         generationT.start();
+        System.out.println(Thread.activeCount());
     }
 }
