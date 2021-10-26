@@ -1,9 +1,6 @@
 .gitignore
 README.md.save
-ConwayGameOfLife/GameOfLife.iml
-ConwayGameOfLife/.idea/
 ConwayGameOfLife/out
 out/
 ConwayGameOfLife/Save Files
-ConwayGameOfLife/ConwayGameOfLife.iml
 .idea
