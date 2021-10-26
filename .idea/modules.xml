@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/HyperSkill.iml" filepath="$PROJECT_DIR$/HyperSkill.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ConwayGameOfLife/ConwayGameOfLife.iml" filepath="$PROJECT_DIR$/ConwayGameOfLife/ConwayGameOfLife.iml" />
     </modules>
   </component>
 </project>
