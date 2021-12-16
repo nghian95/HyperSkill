@@ -119,7 +119,14 @@ public class GameOfLifeInterface extends JFrame {
         generationPanel.add(desiredGenerations);
         this.generationText = new JTextField("12");
         this.generationText.addActionListener((e) -> {
-            Main.setNumberOfGen(Integer.parseInt(this.generationText.getText()) - 1);
+            int generations = Integer.parseInt(this.generationText.getText()) - 1;
+            if (generations < 1) {
+                Main.setNumberOfGen(0);
+                this.generationText.setText("1");
+            } else {
+                Main.setNumberOfGen(generations);
+            }
+
         });
         this.generationText.setMaximumSize(new Dimension(50, 20));
         generationPanel.add(this.generationText);
@@ -136,9 +143,10 @@ public class GameOfLifeInterface extends JFrame {
         this.sizeText.addActionListener((e) -> {
             Main.getGenThread().interrupt();
             int size = Integer.parseInt(this.sizeText.getText());
-            if (size == 0 || size < 0) {
-                Main.setSize(1);
-                this.sizeText.setText("1");
+            if (size < 3) {
+                Main.setSize(3);
+                this.sizeText.setText("3");
+                JOptionPane.showMessageDialog(null, "Minimum size is 3 by 3.", "Minimum size limit required", JOptionPane.PLAIN_MESSAGE);
             } else if (size > 40) {
                 Main.setSize(40);
                 this.sizeText.setText("40");
