@@ -10,18 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JColorChooser;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class GameOfLifeInterface extends JFrame {
@@ -56,11 +45,11 @@ public class GameOfLifeInterface extends JFrame {
         this.resetButton = new JButton("Reset");
         this.paused = false;
         this.leftPanel = new JPanel();
-        this.evolutionSpeed = new JSlider(0, 200, 2200, 1200);
-        this.setDefaultCloseOperation(3);
+        this.evolutionSpeed = new JSlider(0, 400, 2000, 1200);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setSize(1200, 1000);
         this.setVisible(true);
-        this.setLayout(new BoxLayout(this.getContentPane(), 0));
+        this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.X_AXIS));
         this.setResizable(false);
     }
 
@@ -95,7 +84,7 @@ public class GameOfLifeInterface extends JFrame {
         });
         deadColorButton.setAlignmentY(0.0F);
         updatedColorPanel.add(deadColorButton);
-        updatedColorPanel.setLayout(new BoxLayout(updatedColorPanel, 1));
+        updatedColorPanel.setLayout(new BoxLayout(updatedColorPanel, BoxLayout.Y_AXIS));
         updatedColorPanel.setMaximumSize(new Dimension(200, 75));
         deadColorButton.setMaximumSize(new Dimension(200, 30));
         colorButton.setMaximumSize(new Dimension(200, 30));
@@ -146,10 +135,17 @@ public class GameOfLifeInterface extends JFrame {
         this.sizeText = new JTextField("25");
         this.sizeText.addActionListener((e) -> {
             Main.getGenThread().interrupt();
-            Main.setSize(Integer.parseInt(this.sizeText.getText()));
-            if (Main.getSize() == 0) {
+            int size = Integer.parseInt(this.sizeText.getText());
+            if (size == 0 || size < 0) {
                 Main.setSize(1);
                 this.sizeText.setText("1");
+            } else if (size > 40) {
+                Main.setSize(40);
+                this.sizeText.setText("40");
+                JOptionPane.showMessageDialog(null, "Max size is 40 by 40.", "Max size limit reached", JOptionPane.PLAIN_MESSAGE);
+
+            } else {
+                Main.setSize(size);
             }
 
             this.size = Main.getSize();
