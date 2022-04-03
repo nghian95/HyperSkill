@@ -31,6 +31,7 @@ public class GameOfLifeInterface extends JFrame {
     private boolean paused;
     private static boolean loading = false;
     private boolean[][] tempUni;
+    private long lastReset = 0;
 
     private JTextField generationText;
     private JTextField sizeText;
@@ -320,7 +321,15 @@ public class GameOfLifeInterface extends JFrame {
             }
         });
         this.resetButton.addActionListener((e) -> {
-            this.reset();
+            if (System.currentTimeMillis() - lastReset > 1000) {
+                System.out.println(System.currentTimeMillis() + " : " + System.currentTimeMillis()/ 1_000_000);
+                System.out.println(System.nanoTime() + " : " + System.nanoTime()/ 1_000_000_000);
+                try {
+                    this.reset();
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
         });
         JSeparator separator = new JSeparator(0);
         separator.setMaximumSize(new Dimension(400, 30));
@@ -338,7 +347,8 @@ public class GameOfLifeInterface extends JFrame {
 
     }
 
-    public void reset() {
+    public void reset() throws InterruptedException {
+        lastReset = System.currentTimeMillis();
         Main.getGenThread().interrupt();
         if (this.grid.getComponentCount() > 0) {
             this.removeComponents();

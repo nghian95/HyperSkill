@@ -251,8 +251,8 @@ public class Generation extends Thread {
                     life.getGrid().revalidate();
                 }
 
-                Main.getGenThread();
-                Thread.sleep((long)time);
+                Thread thread = Main.getGenThread();
+                thread.sleep(time);
                 restGen();
                 GameOfLifeInterface.setLoading(false);
             } catch (InterruptedException var2) {
